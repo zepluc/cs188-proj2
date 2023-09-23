@@ -258,8 +258,38 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+        def expectimax(depth, agent, gameState: GameState):
+            # if the state is terminal state, return the state's utility
+            if depth == self.depth or gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState)
+            # if the next agent is pacman, find the max_value
+            if agent == 0:
+                value = float("-inf")
+                for nextAction in gameState.getLegalActions(agent):
+                    value = max(value, expectimax(depth, 1, gameState.generateSuccessor(agent, nextAction)))
+                return value
+            # if the next agent is ghost, find the min_value
+            else:
+                value = 0
+                nextAgent = agent + 1
+                if nextAgent % gameState.getNumAgents() == 0:
+                    nextAgent = 0
+                    depth += 1
+                for nextAction in gameState.getLegalActions(agent):
+                    p = 1 / len(gameState.getLegalActions(agent))
+                    value += p * expectimax(depth, nextAgent, gameState.generateSuccessor(agent, nextAction))
+                return value
 
-        util.raiseNotDefined()
+
+        bestAction = None
+        bestValue = float("-inf")
+        pacmanActions = gameState.getLegalActions(0)
+        for action in pacmanActions:
+            value = expectimax(0, 1, gameState.generateSuccessor(0, action))
+            if bestValue < value:
+                bestValue = value
+                bestAction = action
+        return bestAction
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
@@ -269,7 +299,8 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+
 
 # Abbreviation
 better = betterEvaluationFunction
